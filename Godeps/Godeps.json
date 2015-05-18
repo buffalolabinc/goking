@@ -1,0 +1,53 @@
+{
+	"ImportPath": "github.com/orloc/goking",
+	"GoVersion": "go1.4.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/acmacalister/skittles",
+			"Rev": "5dba19080862749c95621aea969546500cec200b"
+		},
+		{
+			"ImportPath": "github.com/asaskevich/govalidator",
+			"Comment": "v1",
+			"Rev": "68d5221a67affc98529c25b1fbfeb69212a4dc8b"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/negroni",
+			"Comment": "v0.1-70-gc7477ad",
+			"Rev": "c7477ad8e330bef55bf1ebe300cf8aa67c492d1b"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "215affda49addc4c8ef7e2534915df2c8c35c6cd"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "94903de8c98a68d8b4483c529b26a5d146e386a2"
+		},
+		{
+			"ImportPath": "github.com/jinzhu/gorm",
+			"Rev": "1eb1ed091f2b725699a930e03a05890c861d2c50"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/hstore",
+			"Comment": "go1.0-cutoff-33-g2dc5e4a",
+			"Rev": "2dc5e4aefbb6d49c0e5629455fdc9e5848a8fc5b"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-sqlite3",
+			"Rev": "e28cd440fabdd39b9520344bc26829f61db40ece"
+		},
+		{
+			"ImportPath": "github.com/mholt/binding",
+			"Rev": "6c082304f300fc70793cb0be18af0fdd4acd2b75"
+		},
+		{
+			"ImportPath": "github.com/thoas/stats",
+			"Rev": "bf6f83b1f32caeba3092c8964bfd8e46a995aa78"
+		},
+		{
+			"ImportPath": "github.com/unrolled/render",
+			"Rev": "83f2ba57c12cec399ef137457b1957e41ef0bbe8"
+		}
+	]
+}
