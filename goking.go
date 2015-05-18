@@ -223,7 +223,10 @@ func main() {
 
 	router.HandleFunc("/api/schedules", h.schedulesIndexHandler).Methods("GET")
 
-	n := negroni.New(negroni.NewRecovery(), negroni.NewStatic(http.Dir("public/web")))
+	n := negroni.New(
+		negroni.NewRecovery(),
+		negroni.NewStatic(http.Dir("public/web")),
+	)
 
 	n.UseHandler(router)
 	n.Run(":" + config.Port)

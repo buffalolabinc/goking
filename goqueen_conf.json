@@ -1,0 +1,9 @@
+{
+    "asset_path" : "/home/orloc/dev/go/src/github.com/orloc/goqueen/public/web",
+    "db_name": "goking.db",
+    "db_config": [
+        "_busy_timeout=600"
+    ],
+    "port": "8080",
+    "debug": true
+}
