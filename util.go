@@ -4,12 +4,25 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/acmacalister/skittles"
 	"github.com/asaskevich/govalidator"
+	"github.com/gorilla/mux"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
+	"strconv"
 )
 
-func GetArgs() string {
+type AppConfig struct {
+	AssetPath string   `json:"asset_path" valid:"required"`
+	DbName    string   `json:"db_name" valid:"required"`
+	Debug     bool     `json:"debug" valid:"required"`
+	DbConfig  []string `json:"db_config" valid:"required"`
+	Port      string   `json:"port" valid:"required,numeric"`
+}
+
+func getArgs() string {
 	args := os.Args[1:]
 
 	if len(args) != 1 {
@@ -20,19 +33,19 @@ func GetArgs() string {
 	return args[0]
 }
 
-func LoadConfig(path string, config *AppConfig) {
+func loadConfig(path string, config *AppConfig) {
 	dat, err := ioutil.ReadFile(path)
-	CheckErr(err)
+	checkErr(err)
 
 	jsonErr := json.Unmarshal(dat, config)
-	CheckErr(jsonErr)
+	checkErr(jsonErr)
 
 	_, validErr := govalidator.ValidateStruct(*config)
-	CheckErr(validErr)
+	checkErr(validErr)
 
 }
 
-func GetAssetPath(config *AppConfig, path string) string {
+func getAssetPath(config *AppConfig, path string) string {
 
 	var buffer bytes.Buffer
 
@@ -43,10 +56,51 @@ func GetAssetPath(config *AppConfig, path string) string {
 	return buffer.String()
 }
 
-func CheckErr(e error) bool {
+func checkErr(e error) bool {
 	if e != nil {
 		panic(e)
 	}
 
 	return true
+}
+
+func getId(req *http.Request) int64 {
+	vars := mux.Vars(req)
+	idString := vars["id"]
+	id, err := strconv.ParseInt(idString, 10, 0)
+	if err != nil {
+		log.Println(skittles.BoldRed(err))
+	}
+
+	return id
+}
+
+func getPage(req *http.Request) int {
+	return parseQueryValues(req, "page")
+}
+
+func getPerPage(req *http.Request, defaultCount int) int {
+	perPage := parseQueryValues(req, "per_page")
+
+	if perPage == 0 {
+		return defaultCount
+	}
+
+	return perPage
+}
+
+func parseQueryValues(req *http.Request, value string) int {
+	vals := req.URL.Query()
+	val := vals[value]
+	if val != nil {
+		v, err := strconv.ParseInt(val[0], 10, 0)
+
+		if err != nil {
+			log.Println(skittles.BoldRed(err))
+		}
+
+		return int(v)
+	}
+
+	return 0
 }
