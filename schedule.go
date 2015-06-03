@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/mholt/binding"
 	"net/http"
@@ -139,6 +140,8 @@ func (h *DBHandler) schedulesEdit(rw http.ResponseWriter, req *http.Request, id 
 	if err := binding.Bind(req, &scheduleForm); err.Handle(rw) {
 		return
 	}
+
+	fmt.Println("%v+", scheduleForm)
 
 	schedule := Schedule{
 		Id:        id,

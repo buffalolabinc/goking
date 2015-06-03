@@ -71,7 +71,7 @@ func main() {
 
 	router.HandleFunc("/api/schedules", h.schedulesIndexHandler).Methods("GET")
 	router.HandleFunc("/api/schedules", h.scheduleCreateHandler).Methods("POST")
-	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleUpdateHandler).Methods("GET")
+	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleShowHandler).Methods("GET")
 	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleUpdateHandler).Methods("PUT", "PATCH")
 	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleDeleteHandler).Methods("DELETE")
 
@@ -85,10 +85,6 @@ func main() {
 
 	n.UseHandler(router)
 	n.Run(":" + config.Port)
-}
-
-func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request) {
-
 }
 
 func (h *DBHandler) logsIndexHandler(rw http.ResponseWriter, req *http.Request) {
