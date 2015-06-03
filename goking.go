@@ -28,6 +28,10 @@ func main() {
 	fmt.Println(skittles.Green("Success:") + " configuration loaded.")
 
 	if config.Debug {
+		fmt.Println(skittles.Green("\nDebug mode enabled"))
+	}
+
+	if config.Truncate {
 		fmt.Println(skittles.BlinkRed("\n\nWARNING PENDING TABLE TRUNCATE:") + " Do you wish to continue? (y/n)")
 
 		var cont string
@@ -51,7 +55,7 @@ func main() {
 	}
 
 	for _, m := range models {
-		if config.Debug {
+		if config.Truncate {
 			db.DropTable(m)
 		}
 		db.CreateTable(m)
@@ -66,6 +70,11 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/schedules", h.schedulesIndexHandler).Methods("GET")
+	router.HandleFunc("/api/schedules", h.scheduleCreateHandler).Methods("POST")
+	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleUpdateHandler).Methods("GET")
+	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleUpdateHandler).Methods("PUT", "PATCH")
+	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleDeleteHandler).Methods("DELETE")
+
 	router.HandleFunc("/api/logs", h.logsIndexHandler).Methods("GET")
 	router.HandleFunc("/api/cards", h.cardsIndexHandler).Methods("GET")
 

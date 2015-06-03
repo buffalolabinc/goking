@@ -20,6 +20,7 @@ type AppConfig struct {
 	Debug     bool     `json:"debug" valid:"required"`
 	DbConfig  []string `json:"db_config" valid:"required"`
 	Port      string   `json:"port" valid:"required,numeric"`
+	Truncate  bool     `json:"truncate"`
 }
 
 func getArgs() string {

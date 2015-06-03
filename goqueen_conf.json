@@ -5,5 +5,6 @@
         "_busy_timeout=600"
     ],
     "port": "8080",
-    "debug": true
+    "debug": true,
+    "truncate": true
 }

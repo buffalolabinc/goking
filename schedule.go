@@ -8,20 +8,20 @@ import (
 )
 
 type Schedule struct {
-	Id        int64     `json:"id"`
-	Name      string    `json:"name"`
-	Mon       bool      `json:"mon"`
-	Tue       bool      `json:"tue"`
-	Wed       bool      `json:"wed`
-	Thu       bool      `json:"thu"`
-	Fri       bool      `json:"fri"`
-	Sat       bool      `json:"sat"`
-	Sun       bool      `json:"sun"`
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	DeletedAt time.Time `json:"deleted_at"`
+	Id        int64     `json:"Id"`
+	Name      string    `json:"Name"`
+	Mon       bool      `json:"Mon"`
+	Tue       bool      `json:"Tue"`
+	Wed       bool      `json:"Wed`
+	Thu       bool      `json:"Thu"`
+	Fri       bool      `json:"Fri"`
+	Sat       bool      `json:"Sat"`
+	Sun       bool      `json:"Sun"`
+	StartTime time.Time `json:"StartTime"`
+	EndTime   time.Time `json:"EndTime"`
+	CreatedAt time.Time `json:"CreatedAt"`
+	UpdatedAt time.Time `json:"UpdatedAt"`
+	DeletedAt time.Time `json:"DeletedAt"`
 }
 
 func (s *Schedule) GetName() string {
@@ -44,43 +44,43 @@ type ScheduleForm struct {
 func (sf *ScheduleForm) FieldMap() binding.FieldMap {
 	return binding.FieldMap{
 		&sf.Name: binding.Field{
-			Form:     "name",
+			Form:     "Name",
 			Required: true,
 		},
 		&sf.Mon: binding.Field{
-			Form:     "mon",
-			Required: true,
+			Form:     "Mon",
+			Required: false,
 		},
 		&sf.Tue: binding.Field{
-			Form:     "tue",
-			Required: true,
+			Form:     "Tue",
+			Required: false,
 		},
 		&sf.Wed: binding.Field{
-			Form:     "wed",
-			Required: true,
+			Form:     "Wed",
+			Required: false,
 		},
 		&sf.Thu: binding.Field{
-			Form:     "thu",
-			Required: true,
+			Form:     "Thu",
+			Required: false,
 		},
 		&sf.Fri: binding.Field{
-			Form:     "fri",
-			Required: true,
+			Form:     "Fri",
+			Required: false,
 		},
 		&sf.Sat: binding.Field{
-			Form:     "sat",
-			Required: true,
+			Form:     "Sat",
+			Required: false,
 		},
 		&sf.Sun: binding.Field{
-			Form:     "sun",
-			Required: true,
+			Form:     "Sun",
+			Required: false,
 		},
 		&sf.StartTime: binding.Field{
-			Form:     "start_time",
+			Form:     "StartTime",
 			Required: true,
 		},
 		&sf.EndTime: binding.Field{
-			Form:     "end_time",
+			Form:     "EndTime",
 			Required: true,
 		},
 	}
@@ -89,7 +89,7 @@ func (sf *ScheduleForm) FieldMap() binding.FieldMap {
 func (sf *ScheduleForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
 	_, err := govalidator.ValidateStruct(sf)
 	if err != nil {
-		// do something
+		// validate date start and end / valid times etc
 	}
 	return errs
 }
@@ -108,7 +108,6 @@ func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Requ
 	} else {
 		h.r.JSON(rw, http.StatusOK, &schedules)
 	}
-
 }
 
 func (h *DBHandler) scheduleShowHandler(rw http.ResponseWriter, req *http.Request) {
@@ -141,19 +140,18 @@ func (h *DBHandler) schedulesEdit(rw http.ResponseWriter, req *http.Request, id 
 		return
 	}
 
-	// do extra processing as needed
-
-	// bind
 	schedule := Schedule{
-		Id:   id,
-		Name: scheduleForm.Name,
-		Mon:  scheduleForm.Mon,
-		Tue:  scheduleForm.Tue,
-		Wed:  scheduleForm.Wed,
-		Thu:  scheduleForm.Thu,
-		Fri:  scheduleForm.Fri,
-		Sat:  scheduleForm.Sat,
-		Sun:  scheduleForm.Sun,
+		Id:        id,
+		Name:      scheduleForm.Name,
+		Mon:       scheduleForm.Mon,
+		Tue:       scheduleForm.Tue,
+		Wed:       scheduleForm.Wed,
+		Thu:       scheduleForm.Thu,
+		Fri:       scheduleForm.Fri,
+		Sat:       scheduleForm.Sat,
+		Sun:       scheduleForm.Sun,
+		StartTime: scheduleForm.StartTime,
+		EndTime:   scheduleForm.EndTime,
 	}
 
 	h.db.Save(&schedule)
