@@ -93,3 +93,34 @@ func (sf ScheduleForm) Validate(req *http.Request, errs binding.Errors) binding.
 	}
 	return errs
 }
+
+func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Request) {
+	page := getPage(req) - 1
+	perPage := getPerPage(req)
+	offset := perPage * page
+
+	var schedules []Schedule
+
+	h.db.Limit(perPage).Offset(offset).Find(&schedules)
+
+	if schedules == nil {
+		h.r.JSON(rw, http.StatusOK, make([]int64, 0))
+	} else {
+		h.r.JSON(rw, http.StatusOK, &schedules)
+	}
+
+}
+
+func (h *DBHandler) schedulesEdit(rw http.ResponseWriter, req *http.Request, id int64) {
+	scheduleForm := ScheduleForm{}
+
+	if err := binding.Bind(req, &scheduleForm); err.Handle(rw) {
+		return
+	}
+
+	// do extra processing as needed
+	schedule := Schedule{Id: id, Name: scheduleForm.Name, Mon: scheduleForm.Mon, Tue: scheduleForm.Tue, Wed: scheduleForm.Wed, Thu: scheduleForm.Thu, Fri: scheduleForm.Fri, Sat: scheduleForm.Sat, Sun: scheduleForm.Sun}
+
+	h.db.Save(&schedule)
+	h.r.JSON(rw, http.StatusOK, &schedule)
+}

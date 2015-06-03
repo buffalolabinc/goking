@@ -79,11 +79,11 @@ func getPage(req *http.Request) int {
 	return parseQueryValues(req, "page")
 }
 
-func getPerPage(req *http.Request, defaultCount int) int {
+func getPerPage(req *http.Request) int {
 	perPage := parseQueryValues(req, "per_page")
 
 	if perPage == 0 {
-		return defaultCount
+		return defaultPerPage
 	}
 
 	return perPage

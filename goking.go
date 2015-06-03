@@ -78,10 +78,6 @@ func main() {
 	n.Run(":" + config.Port)
 }
 
-func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Request) {
-
-}
-
 func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
