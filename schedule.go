@@ -41,7 +41,7 @@ type ScheduleForm struct {
 	EndTime   time.Time `valid:"required"`
 }
 
-func (sf *ScheduleForm) FeildMap() binding.FieldMap {
+func (sf *ScheduleForm) FieldMap() binding.FieldMap {
 	return binding.FieldMap{
 		&sf.Name: binding.Field{
 			Form:     "name",
@@ -86,7 +86,7 @@ func (sf *ScheduleForm) FeildMap() binding.FieldMap {
 	}
 }
 
-func (sf ScheduleForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
+func (sf *ScheduleForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
 	_, err := govalidator.ValidateStruct(sf)
 	if err != nil {
 		// do something
@@ -111,6 +111,29 @@ func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Requ
 
 }
 
+func (h *DBHandler) scheduleShowHandler(rw http.ResponseWriter, req *http.Request) {
+	id := getId(req)
+	schedule := Schedule{}
+	h.db.First(&schedule, id)
+	h.r.JSON(rw, http.StatusOK, &schedule)
+}
+
+func (h *DBHandler) scheduleCreateHandler(rw http.ResponseWriter, req *http.Request) {
+	h.schedulesEdit(rw, req, 0)
+}
+
+func (h *DBHandler) scheduleUpdateHandler(rw http.ResponseWriter, req *http.Request) {
+	id := getId(req)
+	h.schedulesEdit(rw, req, id)
+}
+
+func (h *DBHandler) scheduleDeleteHandler(rw http.ResponseWriter, req *http.Request) {
+	id := getId(req)
+	schedule := Schedule{}
+	h.db.Delete(&schedule, id)
+	h.r.JSON(rw, http.StatusOK, &schedule)
+}
+
 func (h *DBHandler) schedulesEdit(rw http.ResponseWriter, req *http.Request, id int64) {
 	scheduleForm := ScheduleForm{}
 
@@ -119,7 +142,19 @@ func (h *DBHandler) schedulesEdit(rw http.ResponseWriter, req *http.Request, id 
 	}
 
 	// do extra processing as needed
-	schedule := Schedule{Id: id, Name: scheduleForm.Name, Mon: scheduleForm.Mon, Tue: scheduleForm.Tue, Wed: scheduleForm.Wed, Thu: scheduleForm.Thu, Fri: scheduleForm.Fri, Sat: scheduleForm.Sat, Sun: scheduleForm.Sun}
+
+	// bind
+	schedule := Schedule{
+		Id:   id,
+		Name: scheduleForm.Name,
+		Mon:  scheduleForm.Mon,
+		Tue:  scheduleForm.Tue,
+		Wed:  scheduleForm.Wed,
+		Thu:  scheduleForm.Thu,
+		Fri:  scheduleForm.Fri,
+		Sat:  scheduleForm.Sat,
+		Sun:  scheduleForm.Sun,
+	}
 
 	h.db.Save(&schedule)
 	h.r.JSON(rw, http.StatusOK, &schedule)

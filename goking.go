@@ -85,5 +85,3 @@ func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request)
 func (h *DBHandler) logsIndexHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
-
-// Helpers =======================
