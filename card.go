@@ -7,15 +7,15 @@ import (
 )
 
 type Card struct {
-	Id        int64      `json:"id"`
-	Name      string     `json:"name" valid:"alphanum,required"`
-	Code      string     `json:"code" valid:"numeric,required"`
-	Pin       string     `json:"pin" valid:"numeric,required"`
-	IsActive  bool       `json:"is_active" valid:"required"`
-	Schedule  []Schedule `json:"schedule" gorm: "many2many:card_schedules;"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt time.Time  `json:"deleted_at"`
+	ID        int64      `json:"Id"`
+	Name      string     `json:"Name" valid:"alphanum,required"`
+	Code      string     `json:"Code" valid:"numeric,required"`
+	Pin       string     `json:"Pin" valid:"numeric,required"`
+	IsActive  bool       `json:"IsActive" valid:"required"`
+	Schedules []Schedule `json:"Schedules" gorm:"many2many:card_schedule;"`
+	CreatedAt time.Time  `json:"CreatedAt"`
+	UpdatedAt time.Time  `json:"UpdatedAt"`
+	DeletedAt time.Time  `json:"DeletedAt"`
 }
 
 func (c *Card) GetName() string {
@@ -23,11 +23,11 @@ func (c *Card) GetName() string {
 }
 
 type CardForm struct {
-	Name     string
-	Code     string
-	Pin      string
-	IsActive bool
-	Schedule []Schedule
+	Name      string
+	Code      string
+	Pin       string
+	IsActive  bool
+	Schedules []Schedule
 }
 
 func (cf *CardForm) FieldMap() binding.FieldMap {
@@ -48,7 +48,7 @@ func (cf *CardForm) FieldMap() binding.FieldMap {
 			Form:     "is_active",
 			Required: true,
 		},
-		&cf.Schedule: binding.Field{
+		&cf.Schedules: binding.Field{
 			Form:     "schedules",
 			Required: true,
 		},
@@ -71,7 +71,7 @@ func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request)
 	}
 }
 
-func (h *DBHandler) cardshowHandler(rw http.ResponseWriter, req *http.Request) {
+func (h *DBHandler) cardShowHandler(rw http.ResponseWriter, req *http.Request) {
 	id := getId(req)
 	card := Card{}
 	h.db.First(&card, id)
@@ -102,12 +102,12 @@ func (h *DBHandler) cardsEdit(rw http.ResponseWriter, req *http.Request, id int6
 	}
 
 	card := Card{
-		Id:       id,
-		Name:     cardForm.Name,
-		Code:     cardForm.Code,
-		Pin:      cardForm.Pin,
-		IsActive: cardForm.IsActive,
-		Schedule: cardForm.Schedule,
+		ID:        id,
+		Name:      cardForm.Name,
+		Code:      cardForm.Code,
+		Pin:       cardForm.Pin,
+		IsActive:  cardForm.IsActive,
+		Schedules: cardForm.Schedules,
 	}
 
 	h.db.Save(&card)

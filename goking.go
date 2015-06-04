@@ -11,7 +11,6 @@ import (
 	"github.com/unrolled/render"
 	"net/http"
 	"os"
-	"reflect"
 	"strings"
 )
 
@@ -58,11 +57,9 @@ func main() {
 		if config.Truncate {
 			db.DropTable(m)
 		}
-		db.CreateTable(m)
-
-		var modelName string = strings.ToLower(strings.Replace(reflect.TypeOf(m).String(), "*main.", "", 1))
-		db.Model(m).AddIndex("idx_"+modelName+"_index", "id")
 	}
+
+	db.AutoMigrate(&Card{}, &Schedule{})
 
 	r := render.New(render.Options{})
 	h := DBHandler{db: &db, r: r}
@@ -77,6 +74,10 @@ func main() {
 
 	router.HandleFunc("/api/logs", h.logsIndexHandler).Methods("GET")
 	router.HandleFunc("/api/cards", h.cardsIndexHandler).Methods("GET")
+	router.HandleFunc("/api/cards", h.cardCreateHandler).Methods("POST")
+	router.HandleFunc("/api/cards/{id:[0-9]+}", h.cardShowHandler).Methods("GET")
+	router.HandleFunc("/api/cards/{id:[0-9]+}", h.cardUpdateHandler).Methods("PUT", "PATCH")
+	router.HandleFunc("/api/cards/{id:[0-9]+}", h.cardDeleteHandler).Methods("DELETE")
 
 	n := negroni.New(
 		negroni.NewRecovery(),

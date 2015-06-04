@@ -9,7 +9,7 @@ import (
 )
 
 type Schedule struct {
-	Id        int64     `json:"Id"`
+	ID        int64     `json:"Id"`
 	Name      string    `json:"Name"`
 	Mon       bool      `json:"Mon"`
 	Tue       bool      `json:"Tue"`
@@ -144,7 +144,7 @@ func (h *DBHandler) schedulesEdit(rw http.ResponseWriter, req *http.Request, id 
 	fmt.Println("%v+", scheduleForm)
 
 	schedule := Schedule{
-		Id:        id,
+		ID:        id,
 		Name:      scheduleForm.Name,
 		Mon:       scheduleForm.Mon,
 		Tue:       scheduleForm.Tue,

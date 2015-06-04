@@ -26,7 +26,7 @@
 		},
 		{
 			"ImportPath": "github.com/jinzhu/gorm",
-			"Rev": "1eb1ed091f2b725699a930e03a05890c861d2c50"
+			"Rev": "3d20aafa4057b8a1701e7719f3513b6e4e27fb7c"
 		},
 		{
 			"ImportPath": "github.com/lib/pq/hstore",
