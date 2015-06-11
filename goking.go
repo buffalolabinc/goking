@@ -43,6 +43,7 @@ func main() {
 	}
 
 	// setup db
+	fmt.Println("%v+", config.DbConfig)
 	db, err := gorm.Open("sqlite3", "./"+config.DbName+"?"+strings.Join(config.DbConfig, "?"))
 	checkErr(err)
 
@@ -72,12 +73,13 @@ func main() {
 	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleUpdateHandler).Methods("PUT", "PATCH")
 	router.HandleFunc("/api/schedules/{id:[0-9]+}", h.scheduleDeleteHandler).Methods("DELETE")
 
-	router.HandleFunc("/api/logs", h.logsIndexHandler).Methods("GET")
 	router.HandleFunc("/api/cards", h.cardsIndexHandler).Methods("GET")
 	router.HandleFunc("/api/cards", h.cardCreateHandler).Methods("POST")
 	router.HandleFunc("/api/cards/{id:[0-9]+}", h.cardShowHandler).Methods("GET")
 	router.HandleFunc("/api/cards/{id:[0-9]+}", h.cardUpdateHandler).Methods("PUT", "PATCH")
 	router.HandleFunc("/api/cards/{id:[0-9]+}", h.cardDeleteHandler).Methods("DELETE")
+
+	router.HandleFunc("/api/logs", h.logsIndexHandler).Methods("GET")
 
 	n := negroni.New(
 		negroni.NewRecovery(),

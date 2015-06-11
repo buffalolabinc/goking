@@ -17,15 +17,16 @@ angular.module('redqueenUiApp')
       $scope.rfidCard.code = $routeParams.code;
     }
 
-    console.log($scope.rfidCard);
-
     ScheduleResource.all().then(function(data) {
       $scope.schedules = data;
     });
 
     $scope.submit = function() {
+        console.log($scope.rfidCard);
+        /*
       $scope.rfidCard.$save().then(function() {
         $location.path('/rfidcards');
       });
+      */
     };
   }]);

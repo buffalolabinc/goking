@@ -9,7 +9,7 @@ import (
 type Card struct {
 	ID        int64      `json:"Id"`
 	Name      string     `json:"Name" valid:"alphanum,required"`
-	Code      string     `json:"Code" valid:"numeric,required"`
+	Code      string     `json:"Code" valid:"alphanum,required"`
 	Pin       string     `json:"Pin" valid:"numeric,required"`
 	IsActive  bool       `json:"IsActive" valid:"required"`
 	Schedules []Schedule `json:"Schedules" gorm:"many2many:card_schedule;"`
