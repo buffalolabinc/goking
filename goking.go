@@ -60,6 +60,10 @@ func main() {
 		}
 	}
 
+	if config.Truncate {
+		db.Exec("DROP TABLE IF EXISTS card_schedule")
+	}
+
 	db.AutoMigrate(&Card{}, &Schedule{})
 
 	r := render.New(render.Options{})

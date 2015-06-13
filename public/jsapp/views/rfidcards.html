@@ -1,5 +1,10 @@
 <div class="btn-group pull-right">
-  <a href="#/rfidcards/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
+    <span ng-show="has_schedules">
+          <a href="#/rfidcards/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
+    </span>
+    <span ng-show="!has_schedules">
+          <button class="btn btn-primary" disabled><i class="glyphicon glyphicon-plus"></i> New</button>
+    </span>
 </div>
 <table class="table">
   <thead>
