@@ -53,10 +53,10 @@ angular.module('redqueenUiApp')
       var method = null;
 
       var data = {
-        Name: self.name,
-        IsActive: self.isActive,
-        Schedules: _.map(self.schedules, function(s) {
-          return { 'id': s };
+        Name: self.Name,
+        IsActive: self.IsActive,
+        Schedules: _.map(self.Schedules, function(s) {
+          return { 'Id': s };
         })
       };
 
@@ -64,14 +64,14 @@ angular.module('redqueenUiApp')
         url = '/api/cards';
         method = 'POST';
 
-        data.Pin = self.pin;
-        data.Code = self.code;
+        data.Pin = self.Pin;
+        data.Code = self.Code;
       } else {
-        url = '/api/cards/' + self.id;
+        url = '/api/cards/' + self.Id;
         method = 'PUT';
 
-        if (self.pin) {
-          data.Pin = self.pin;
+        if (self.Pin) {
+          data.Pin = self.Pin;
         }
       }
 

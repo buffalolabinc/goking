@@ -22,11 +22,6 @@ angular.module('redqueenUiApp')
     });
 
     $scope.submit = function() {
-        console.log($scope.rfidCard);
-        /*
-      $scope.rfidCard.$save().then(function() {
-        $location.path('/rfidcards');
-      });
-      */
+      $scope.rfidCard.$save();
     };
   }]);

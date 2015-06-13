@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "fmt"
 	"github.com/mholt/binding"
 	"net/http"
 	"time"
@@ -101,13 +102,25 @@ func (h *DBHandler) cardsEdit(rw http.ResponseWriter, req *http.Request, id int6
 		return
 	}
 
+	// lookup the schedule to see if we have it
+	// then populate it form our data to avoid an update
+	scheduleIds := cardForm.Schedules
+
+	hydratedSchedules := make([]Schedule, len(scheduleIds))
+	for _, val := range scheduleIds {
+		schedule := Schedule{}
+		h.db.First(&schedule, val.ID)
+
+		hydratedSchedules = append(hydratedSchedules, schedule)
+	}
+
 	card := Card{
 		ID:        id,
 		Name:      cardForm.Name,
 		Code:      cardForm.Code,
 		Pin:       cardForm.Pin,
 		IsActive:  cardForm.IsActive,
-		Schedules: cardForm.Schedules,
+		Schedules: hydratedSchedules,
 	}
 
 	h.db.Save(&card)
