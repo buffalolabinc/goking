@@ -25,10 +25,6 @@ type Schedule struct {
 	DeletedAt time.Time `json:"DeletedAt"`
 }
 
-func (s *Schedule) GetName() string {
-	return "schedule"
-}
-
 type ScheduleForm struct {
 	Name      string    `valid:"alpha,required"`
 	Mon       bool      `valid:"required"`
@@ -96,13 +92,15 @@ func (sf *ScheduleForm) Validate(req *http.Request, errs binding.Errors) binding
 }
 
 func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Request) {
-	page := getPage(req) - 1
-	perPage := getPerPage(req)
-	offset := perPage * page
+	/*
+		page := getPage(req) - 1
+		perPage := getPerPage(req)
+		offset := perPage * page
+	*/
 
 	var schedules []Schedule
 
-	h.db.Limit(perPage).Offset(offset).Find(&schedules)
+	h.db.Find(&schedules)
 
 	if schedules == nil {
 		h.r.JSON(rw, http.StatusOK, make([]int64, 0))

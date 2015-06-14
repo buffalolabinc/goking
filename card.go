@@ -19,10 +19,6 @@ type Card struct {
 	DeletedAt time.Time  `json:"DeletedAt"`
 }
 
-func (c *Card) GetName() string {
-	return "card"
-}
-
 type CardForm struct {
 	Name      string
 	Code      string
@@ -57,13 +53,15 @@ func (cf *CardForm) FieldMap() binding.FieldMap {
 }
 
 func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request) {
-	page := getPage(req) - 1
-	perPage := getPerPage(req)
-	offset := perPage * page
+	/*
+		page := getPage(req) - 1
+		perPage := getPerPage(req)
+		offset := perPage * page
+	*/
 
 	var cards []Card
 
-	h.db.Limit(perPage).Offset(offset).Find(&cards)
+	h.db.Find(&cards)
 
 	if cards == nil {
 		h.r.JSON(rw, http.StatusOK, make([]int64, 0))

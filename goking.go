@@ -50,21 +50,20 @@ func main() {
 	db.LogMode(config.Debug)
 	defer db.Close()
 
-	models := [...]Model{
-		&Schedule{}, &Card{},
-	}
-
-	for _, m := range models {
-		if config.Truncate {
-			db.DropTable(m)
-		}
+	models := [...]interface{}{
+		&Schedule{}, &Card{}, &Log{},
 	}
 
 	if config.Truncate {
 		db.Exec("DROP TABLE IF EXISTS card_schedule")
 	}
 
-	db.AutoMigrate(&Card{}, &Schedule{})
+	for _, m := range models {
+		if config.Truncate {
+			db.DropTable(m)
+		}
+		db.AutoMigrate(m)
+	}
 
 	r := render.New(render.Options{})
 	h := DBHandler{db: &db, r: r}

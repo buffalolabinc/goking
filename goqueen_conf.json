@@ -1,5 +1,5 @@
 {
-    "asset_path" : "/home/orloc/dev/go/src/github.com/orloc/goqueen/public/web",
+    "asset_path" : "/home/orloc/dev/go/src/github.com/orloc/goking/public",
     "db_name": "go_live.sqlite",
     "db_config": [
         "foreign_keys=ON"

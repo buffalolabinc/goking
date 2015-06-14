@@ -10,6 +10,7 @@ type DBHandler struct {
 	r  *render.Render
 }
 
-type Model interface {
-	GetName() string
+type PaginatedResponse struct {
+	Items      []interface{} `json:"items"`
+	TotalItems int           `json:"total_items"`
 }

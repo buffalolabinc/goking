@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "fmt"
 	"github.com/mholt/binding"
 	"net/http"
 	"time"
@@ -11,10 +12,6 @@ type Log struct {
 	Code      string    `json:"Code"`
 	ValidPin  bool      `json:"ValidPin"`
 	CreatedAt time.Time `json:"CreatedAt"`
-}
-
-func (l *Log) GetName() string {
-	return "log"
 }
 
 type LogForm struct {
@@ -36,17 +33,24 @@ func (lf *LogForm) FieldMap() binding.FieldMap {
 }
 
 func (h *DBHandler) logsIndexHandler(rw http.ResponseWriter, req *http.Request) {
-	page := getPage(req) - 1
-	perPage := getPerPage(req)
-	offset := perPage * page
+	//age := getPage(req) - 1
+	//perPage := getPerPage(req)
+	//offset := perPage * page
 
 	var logs []Log
 
-	h.db.Limit(perPage).Offset(offset).Find(&logs)
+	h.db.Find(&logs)
 
 	if logs == nil {
 		h.r.JSON(rw, http.StatusOK, make([]int64, 0))
 	} else {
-		h.r.JSON(rw, http.StatusOK, &logs)
+		vals := make([]interface{}, len(logs))
+		for i, v := range logs {
+			vals[i] = v
+		}
+
+		resp := getResponse(vals)
+
+		h.r.JSON(rw, http.StatusOK, resp)
 	}
 }

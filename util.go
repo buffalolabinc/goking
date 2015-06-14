@@ -65,6 +65,10 @@ func checkErr(e error) bool {
 	return true
 }
 
+func getResponse(obj []interface{}) *PaginatedResponse {
+	return &PaginatedResponse{Items: obj, TotalItems: len(obj)}
+}
+
 func getId(req *http.Request) int64 {
 	vars := mux.Vars(req)
 	idString := vars["id"]
