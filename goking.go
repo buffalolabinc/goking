@@ -93,7 +93,3 @@ func main() {
 	n.UseHandler(router)
 	n.Run(":" + config.Port)
 }
-
-func (h *DBHandler) logsIndexHandler(rw http.ResponseWriter, req *http.Request) {
-
-}

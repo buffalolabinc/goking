@@ -1,6 +1,6 @@
 {
     "asset_path" : "/home/orloc/dev/go/src/github.com/orloc/goqueen/public/web",
-    "db_name": "goking.db",
+    "db_name": "go_live.sqlite",
     "db_config": [
         "foreign_keys=ON"
     ],
