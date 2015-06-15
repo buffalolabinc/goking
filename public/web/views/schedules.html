@@ -1,6 +1,23 @@
 <div class="btn-group pull-right">
   <a href="#/schedules/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
 </div>
+
+<div class="row">
+    <div class="col-xs-10">
+        <pagination ng-model="page" total-items="totalItems" items-per-page="perPage" ng-change="querySchedules()" boundary-links="true" max-size="10"></pagination>
+    </div>
+    <div class="col-xs-2">
+        <span class="small text-info">per page</span>
+        <select ng-change="queryLogs()" class="form-control pull-right" ng-model="perPage" convert-to-number>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+</div>
 <table class="table">
   <thead>
   <tr>
@@ -63,3 +80,5 @@
   </tr>
   </tbody>
 </table>
+
+<pagination ng-model="page" total-items="totalItems" items-per-page="perPage" ng-change="querySchedules()" boundary-links="true" max-size="10"></pagination>

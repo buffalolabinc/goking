@@ -15,17 +15,17 @@ angular.module('redqueenUiApp')
     $scope.page = 1;
     $scope.totalItems = 0;
 
-    var update = function(page) { 
-        LogResource.all(page).then(function(data) {
+    var update = function() { 
+        LogResource.all($scope.page, $scope.perPage).then(function(data) {
             $scope.logs = data.items;
             $scope.totalItems = data.total_items;
         });
     };
 
     $scope.queryLogs = function(page) { 
-        update(page);
+        update();
     };
 
-    update($scope.page);
+    update();
 
   }]);

@@ -12,11 +12,25 @@ angular.module('redqueenUiApp')
     $scope.schedules = [];
     $scope.activeMenu = 'schedules';
 
-    ScheduleResource.all().then(function(data) {
-      $scope.schedules = data;
-    });
+    $scope.perPage = 30;
+    $scope.page = 1;
+    $scope.totalItems = 0;
 
     $scope.edit = function SchedulesCtrlEdit(rfidCard) {
       $location.path('/schedules/' + rfidCard.Id + '/edit');
     };
+
+    var update = function() { 
+        ScheduleResource.all($scope.page, $scope.perPage).then(function(data) {
+          $scope.schedules = data.items;
+          $scope.totalItems = data.total_items;
+        });
+    };
+
+    $scope.querySchedules = function() { 
+        update();
+    };
+
+    update();
+
 }]);

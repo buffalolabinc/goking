@@ -92,20 +92,28 @@ func (sf *ScheduleForm) Validate(req *http.Request, errs binding.Errors) binding
 }
 
 func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Request) {
-	/*
-		page := getPage(req) - 1
-		perPage := getPerPage(req)
-		offset := perPage * page
-	*/
+	page := getPage(req) - 1
+	perPage := getPerPage(req)
+	offset := perPage * page
 
 	var schedules []Schedule
 
-	h.db.Find(&schedules)
+	h.db.Limit(perPage).Offset(offset).Find(&schedules)
 
 	if schedules == nil {
 		h.r.JSON(rw, http.StatusOK, make([]int64, 0))
 	} else {
-		h.r.JSON(rw, http.StatusOK, &schedules)
+		var count int
+		h.db.Table("schedules").Count(&count)
+
+		vals := make([]interface{}, len(schedules))
+		for i, v := range schedules {
+			vals[i] = v
+		}
+
+		resp := getResponse(vals, count)
+
+		h.r.JSON(rw, http.StatusOK, &resp)
 	}
 }
 

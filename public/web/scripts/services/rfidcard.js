@@ -16,15 +16,18 @@ angular.module('redqueenUiApp')
       this.$isNew = (typeof(this.id) === 'undefined' || !this.id);
     }
 
-    RfidCard.all = function RfidCardResourceAll() {
+    RfidCard.all = function RfidCardResourceAll(page, per_page) {
       var deferred = $q.defer();
 
-      $http.get('/api/cards').then(function(data) {
-        var rfidCards = _.map(data.data, function(card) {
-          return new RfidCard(card);
-        });
-
-        deferred.resolve(rfidCards);
+      $http({
+          url: '/api/cards',
+          method: 'GET',
+          params: { 
+              'page' : page,
+              'per_page': per_page
+          }
+      }).then(function(data) {
+        deferred.resolve(data.data);
       }, function() {
         deferred.reject();
       });

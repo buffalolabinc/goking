@@ -53,20 +53,27 @@ func (cf *CardForm) FieldMap() binding.FieldMap {
 }
 
 func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request) {
-	/*
-		page := getPage(req) - 1
-		perPage := getPerPage(req)
-		offset := perPage * page
-	*/
+	page := getPage(req) - 1
+	perPage := getPerPage(req)
+	offset := perPage * page
 
 	var cards []Card
 
-	h.db.Find(&cards)
+	h.db.Limit(perPage).Offset(offset).Find(&cards)
 
 	if cards == nil {
 		h.r.JSON(rw, http.StatusOK, make([]int64, 0))
 	} else {
-		h.r.JSON(rw, http.StatusOK, &cards)
+		var count int
+		h.db.Table("cards").Count(&count)
+
+		vals := make([]interface{}, len(cards))
+		for i, v := range cards {
+			vals[i] = v
+		}
+
+		resp := getResponse(vals, count)
+		h.r.JSON(rw, http.StatusOK, &resp)
 	}
 }
 

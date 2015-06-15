@@ -16,10 +16,17 @@ angular.module('redqueenUiApp')
 
     }
 
-    Schedule.all = function ScheduleResourceAll() {
+    Schedule.all = function ScheduleResourceAll(page, per_page) {
       var deferred = $q.defer();
 
-      $http.get('/api/schedules').then(function(data) {
+      $http({
+          url: '/api/schedules',
+          method: 'GET',
+          params: {
+              'page': page,
+              'per_page': per_page
+          }
+      }).then(function(data) {
           var schedules = data.data;
         deferred.resolve(schedules);
       }, function() {

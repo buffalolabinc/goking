@@ -14,13 +14,16 @@ angular.module('redqueenUiApp')
       angular.extend(this, data);
     }
 
-    Log.all = function LogResourceAll(page) {
+    Log.all = function LogResourceAll(page, per_page) {
       var deferred = $q.defer();
 
       $http({ 
           url: '/api/logs', 
           method: 'GET',
-          params: { 'page': page }
+          params: { 
+              'page': page,
+              'per_page' : per_page
+          }
       }).then(function(data) {
         deferred.resolve(data.data);
       }, function() {
