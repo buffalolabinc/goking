@@ -33,23 +33,25 @@ func (lf *LogForm) FieldMap() binding.FieldMap {
 }
 
 func (h *DBHandler) logsIndexHandler(rw http.ResponseWriter, req *http.Request) {
-	//age := getPage(req) - 1
-	//perPage := getPerPage(req)
-	//offset := perPage * page
+	page := getPage(req) - 1
+	perPage := getPerPage(req)
+	offset := perPage * page
 
 	var logs []Log
 
-	h.db.Find(&logs)
+	h.db.Limit(perPage).Offset(offset).Find(&logs)
 
 	if logs == nil {
 		h.r.JSON(rw, http.StatusOK, make([]int64, 0))
 	} else {
+		var count int
+		h.db.Table("logs").Count(&count)
 		vals := make([]interface{}, len(logs))
 		for i, v := range logs {
 			vals[i] = v
 		}
 
-		resp := getResponse(vals)
+		resp := getResponse(vals, count)
 
 		h.r.JSON(rw, http.StatusOK, resp)
 	}

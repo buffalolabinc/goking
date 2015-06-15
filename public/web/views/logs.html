@@ -1,32 +1,35 @@
-{{ total_items}} 
-<div pagination ng-model="logs" total-items="total_items" items-per-page="30"></div>
+<pagination ng-model="page" total-items="totalItems" items-per-page="perPage" ng-change="queryLogs(page)" boundary-links="true" max-size="10"></pagination>
 <table class="table">
-  <thead>
-    <tr>
-      <th>Date/Time</th>
-      <th>Name</th>
-      <th>Code</th>
-      <th>Valid Pin?</th>
-      <th>&nbsp;</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr ng-show="logs.length == 0">
-      <td colspan="5">No logs to show.</td>
-    </tr>
-    <tr ng-repeat="log in logs">
-      <td>{{ log.created_at }}</td>
-      <td>{{ log.name }}</td>
-      <td>{{ log.code }}</td>
-      <td>
-        <span class="label label-success" ng-show="log.validPin">Yes</span>
-        <span class="label label-danger" ng-hide="log.validPin">No</span>
-      </td>
-      <td>
-        <div class="btn-group">
-          <a class="btn btn-primary" ng-show="!log.name" ng-href="#/rfidcards/new?code={{ log.code }}">Add</a>
-        </div>
-      </td>
-    </tr>
-  </tbody>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Date/Time</th>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Valid Pin?</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody  ng-show="logs.length <= 0">
+        <tr>
+            <td colspan="5">No logs to show.</td>
+        </tr>
+    </tbody>
+    <tbody ng-show="logs.length > 0">
+        <tr ng-repeat="log in logs">
+            <td>{{ log.Id }}</td>
+            <td>{{ log.CreatedAt | date:'short'}}</td>
+            <td></td>
+            <td>{{ log.Code }}</td>
+            <td>
+                <span class="label label-success" ng-show="log.ValidPin">Yes</span>
+                <span class="label label-danger" ng-hide="log.ValidPin">No</span>
+            </td>
+            <td>
+                <div class="btn-group">
+                </div>
+            </td>
+        </tr>
+    </tbody>
 </table>
+<pagination ng-model="page" total-items="totalItems" items-per-page="perPage" ng-change="queryLogs(page)" boundary-links="true" max-size="10"></pagination>

@@ -11,8 +11,21 @@ angular.module('redqueenUiApp')
   .controller('LogsCtrl', [ '$scope', 'Log', function ($scope, LogResource) {
     $scope.activeMenu = 'logs';
 
-    LogResource.all().then(function(data) {
-        $scope.logs = data.items;
-        $scope.total_items = data.total_items;
-    });
+    $scope.perPage = 30;
+    $scope.page = 1;
+    $scope.totalItems = 0;
+
+    var update = function(page) { 
+        LogResource.all(page).then(function(data) {
+            $scope.logs = data.items;
+            $scope.totalItems = data.total_items;
+        });
+    };
+
+    $scope.queryLogs = function(page) { 
+        update(page);
+    };
+
+    update($scope.page);
+
   }]);

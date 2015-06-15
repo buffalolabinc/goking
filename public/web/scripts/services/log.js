@@ -14,15 +14,15 @@ angular.module('redqueenUiApp')
       angular.extend(this, data);
     }
 
-    Log.all = function LogResourceAll() {
+    Log.all = function LogResourceAll(page) {
       var deferred = $q.defer();
 
-      $http.get('/api/logs').then(function(data) {
-        var logs = _.map(data.data, function(log) {
-          return new Log(log);
-        });
-
-        deferred.resolve(logs);
+      $http({ 
+          url: '/api/logs', 
+          method: 'GET',
+          params: { 'page': page }
+      }).then(function(data) {
+        deferred.resolve(data.data);
       }, function() {
         deferred.reject();
       });
