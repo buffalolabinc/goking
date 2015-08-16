@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "bytes"
 	"fmt"
 	"github.com/acmacalister/skittles"
 	"github.com/codegangsta/negroni"
@@ -65,6 +66,48 @@ func main() {
 		db.AutoMigrate(m)
 	}
 
+	go func(db gorm.DB) {
+		c := &serial.Config{Name: "/dev/ttyUSB0", Baud: 9600, ReadTimeout: time.Second * 5}
+
+		s, err := serial.OpenPort(c)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		buf := make([]byte, 1024)
+		for true {
+			n, _ := s.Read(buf)
+
+			s := string(buf[:n])
+			if strings.Contains(s, "\r\n") {
+				segments := strings.Split(s, "\r\n")
+
+				_ = "breakpoint"
+				// process each segment
+				//@TODO This was being strang
+				for _, e := range segments {
+					subSegs := strings.Split(e, ":")
+					fmt.Print(len(subSegs))
+					if subSegs[0] != "A" || len(subSegs) != 3 {
+						continue
+					}
+
+					l := len(subSegs)
+					_ = "breakpoint"
+					cmd, door_card, pin := subSegs[0], subSegs[1], subSegs[2]
+					_ = "breakpoint"
+					fmt.Print(cmd, door_card, pin, l)
+				}
+			}
+		}
+	}(db)
+
+	configureHttpAndListen(config, db)
+
+}
+
+func configureHttpAndListen(config *AppConfig, db gorm.DB) {
+	// register routes
 	r := render.New(render.Options{})
 	h := DBHandler{db: &db, r: r}
 
