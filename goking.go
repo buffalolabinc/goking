@@ -7,12 +7,18 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"github.com/tarm/serial"
+	"github.com/nabeken/negroni-auth"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/thoas/stats"
 	"github.com/unrolled/render"
 	"net/http"
 	"os"
 	"strings"
+	"log"
+	"time"
+	"bufio"
+	"encoding/binary"
 )
 
 const (
@@ -63,44 +69,100 @@ func main() {
 		if config.Truncate {
 			db.DropTable(m)
 		}
+
 		db.AutoMigrate(m)
 	}
 
-	go func(db gorm.DB) {
-		c := &serial.Config{Name: "/dev/ttyUSB0", Baud: 9600, ReadTimeout: time.Second * 5}
+	if config.Serial.Enabled {
+		fmt.Println("Starting Serial goroutine")
 
-		s, err := serial.OpenPort(c)
-		if err != nil {
-			log.Fatal(err)
-		}
+		go func(db gorm.DB) {
+			c := &serial.Config{Name: config.Serial.DevicePath, Baud: config.Serial.BaudRate, ReadTimeout: time.Second * 5}
 
-		buf := make([]byte, 1024)
-		for true {
-			n, _ := s.Read(buf)
-
-			s := string(buf[:n])
-			if strings.Contains(s, "\r\n") {
-				segments := strings.Split(s, "\r\n")
-
-				_ = "breakpoint"
-				// process each segment
-				//@TODO This was being strang
-				for _, e := range segments {
-					subSegs := strings.Split(e, ":")
-					fmt.Print(len(subSegs))
-					if subSegs[0] != "A" || len(subSegs) != 3 {
-						continue
-					}
-
-					l := len(subSegs)
-					_ = "breakpoint"
-					cmd, door_card, pin := subSegs[0], subSegs[1], subSegs[2]
-					_ = "breakpoint"
-					fmt.Print(cmd, door_card, pin, l)
-				}
+			s, err := serial.OpenPort(c)
+			if err != nil {
+				log.Fatal(err)
 			}
-		}
-	}(db)
+
+			reader := bufio.NewReader(s)
+			writer := bufio.NewWriter(s)
+	SerialLoop:
+			for true {
+				reply, _, err := reader.ReadLine()
+
+				if err != nil {
+					panic(err)
+				}
+
+				command := string(reply[:])
+
+				subSegs := strings.Split(command, ":")
+
+				fmt.Println("number of segments ", len(subSegs))
+
+				if subSegs[0] != "A" || len(subSegs) != 3 {
+					continue
+				}
+
+				l := len(subSegs)
+
+				cmd, door_card, pin := subSegs[0], subSegs[1], subSegs[2]
+
+				log := Log{
+					Code: door_card,
+				}
+
+				fmt.Println("cmd ", cmd, " door card ", door_card, " pin ", pin, l)
+
+				card := Card{}
+
+				db.Where(&Card{Code: door_card, IsActive: true}).First(&card)
+
+				log.Card = card
+
+				if card.Pin != pin {
+					fmt.Println("Pin does not match")
+
+					log.ValidPin = false
+					db.Save(&log)
+
+					continue SerialLoop
+				}
+
+				log.ValidPin = true
+
+				db.Model(&card).Association("Schedules").Find(&card.Schedules)
+
+				for _, schedule := range card.Schedules {
+					if schedule.MatchesNow() {
+						fmt.Println("Matching schedule found! ", schedule.Name)
+						// send open door
+
+						err := binary.Write(writer, binary.BigEndian, byte(0))
+
+						if err != nil {
+							fmt.Println("Failed to send response over Serial ", err)
+							continue SerialLoop
+						}
+						
+						err = binary.Write(writer, binary.BigEndian, uint32(5))
+
+						if err != nil {
+							fmt.Println("Failed to send response over Serial ", err)
+							continue SerialLoop
+						}
+
+						log.Schedule = schedule
+						db.Save(&log)
+
+						continue SerialLoop
+					}
+				}
+
+
+			}
+		}(db)
+	}
 
 	configureHttpAndListen(config, db)
 
@@ -129,9 +191,10 @@ func configureHttpAndListen(config *AppConfig, db gorm.DB) {
 
 	n := negroni.New(
 		negroni.NewRecovery(),
-		negroni.NewStatic(http.Dir("public/web")),
+		negroni.NewStatic(http.Dir(config.AssetPath)),
 	)
 
+	n.Use(auth.Basic(config.Authentication.Username, config.Authentication.Password))
 	n.UseHandler(router)
 	n.Run(":" + config.Port)
 }
