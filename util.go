@@ -21,6 +21,15 @@ type AppConfig struct {
 	DbConfig  []string `json:"db_config" valid:"required"`
 	Port      string   `json:"port" valid:"required,numeric"`
 	Truncate  bool     `json:"truncate"`
+	Authentication struct {
+	    Username string `json:"username"`
+	    Password string `json:"password"`
+	} `json:"authentication"`
+	Serial    struct {
+	    Enabled bool `json:"enabled"`
+	    DevicePath string `json:"device_path" valid:"required"`
+	    BaudRate int `json:"baud_rate" valid:"required"`
+	} `json:"serial"`
 }
 
 func getArgs() string {
