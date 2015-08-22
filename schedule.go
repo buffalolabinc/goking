@@ -1,94 +1,70 @@
 package main
 
 import (
-	"fmt"
 	"github.com/asaskevich/govalidator"
-	"github.com/mholt/binding"
 	"net/http"
 	"time"
+	"encoding/json"
 )
 
+type ScheduleIdentity struct {
+	ID	int64	`json:"id" valid:"required"`
+}
+
 type Schedule struct {
-	ID        int64     `json:"Id"`
-	Name      string    `json:"Name"`
-	Mon       bool      `json:"Mon"`
-	Tue       bool      `json:"Tue"`
-	Wed       bool      `json:"Wed`
-	Thu       bool      `json:"Thu"`
-	Fri       bool      `json:"Fri"`
-	Sat       bool      `json:"Sat"`
-	Sun       bool      `json:"Sun"`
-	StartTime time.Time `json:"StartTime"`
-	EndTime   time.Time `json:"EndTime"`
-	CreatedAt time.Time `json:"CreatedAt"`
-	UpdatedAt time.Time `json:"UpdatedAt"`
-	DeletedAt time.Time `json:"DeletedAt"`
+	ScheduleIdentity
+	Name      string    `json:"name"`
+	Mon       bool      `json:"mon"`
+	Tue       bool      `json:"tue"`
+	Wed       bool      `json:"wed"`
+	Thu       bool      `json:"thu"`
+	Fri       bool      `json:"fri"`
+	Sat       bool      `json:"sat"`
+	Sun       bool      `json:"sun"`
+	StartTime time.Time `json:"start_time" valid:"required"`
+	EndTime   time.Time `json:"end_time" valid:"required"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt time.Time `json:"deleted_at"`
 }
 
-type ScheduleForm struct {
-	Name      string    `valid:"alpha,required"`
-	Mon       bool      `valid:"required"`
-	Tue       bool      `valid:"required"`
-	Wed       bool      `valid:"required"`
-	Thu       bool      `valid:"required"`
-	Fri       bool      `valid:"required"`
-	Sat       bool      `valid:"required"`
-	Sun       bool      `valid:"required"`
-	StartTime time.Time `valid:"required"`
-	EndTime   time.Time `valid:"required"`
-}
+func (schedule *Schedule) MatchesNow() bool {
+	nowTime := time.Now()
+	normalizedTime := time.Date(1970, 1, 1, nowTime.Hour(), nowTime.Minute(), nowTime.Second(), nowTime.Nanosecond(), nowTime.Location())
 
-func (sf *ScheduleForm) FieldMap() binding.FieldMap {
-	return binding.FieldMap{
-		&sf.Name: binding.Field{
-			Form:     "Name",
-			Required: true,
-		},
-		&sf.Mon: binding.Field{
-			Form:     "Mon",
-			Required: false,
-		},
-		&sf.Tue: binding.Field{
-			Form:     "Tue",
-			Required: false,
-		},
-		&sf.Wed: binding.Field{
-			Form:     "Wed",
-			Required: false,
-		},
-		&sf.Thu: binding.Field{
-			Form:     "Thu",
-			Required: false,
-		},
-		&sf.Fri: binding.Field{
-			Form:     "Fri",
-			Required: false,
-		},
-		&sf.Sat: binding.Field{
-			Form:     "Sat",
-			Required: false,
-		},
-		&sf.Sun: binding.Field{
-			Form:     "Sun",
-			Required: false,
-		},
-		&sf.StartTime: binding.Field{
-			Form:     "StartTime",
-			Required: true,
-		},
-		&sf.EndTime: binding.Field{
-			Form:     "EndTime",
-			Required: true,
-		},
+	if schedule.StartTime.Before(normalizedTime) && schedule.EndTime.After(normalizedTime) {
+		switch nowTime.Weekday() {
+			case time.Monday:
+				return schedule.Mon == true
+			case time.Tuesday:
+				return schedule.Tue == true
+			case time.Wednesday:
+				return schedule.Wed == true
+			case time.Thursday:
+				return schedule.Thu == true
+			case time.Friday:
+				return schedule.Fri == true
+			case time.Saturday:
+				return schedule.Sat == true
+			case time.Sunday:
+				return schedule.Sun == true
+		}
 	}
+
+	return false
 }
 
-func (sf *ScheduleForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
-	_, err := govalidator.ValidateStruct(sf)
-	if err != nil {
-		// validate date start and end / valid times etc
-	}
-	return errs
+type ScheduleRequest struct {
+	Name      string    `json:"name"`
+	Mon       bool      `json:"mon"`
+	Tue       bool      `json:"tue"`
+	Wed       bool      `json:"wed"`
+	Thu       bool      `json:"thu"`
+	Fri       bool      `json:"fri"`
+	Sat       bool      `json:"sat"`
+	Sun       bool      `json:"sun"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
 }
 
 func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Request) {
@@ -119,50 +95,98 @@ func (h *DBHandler) schedulesIndexHandler(rw http.ResponseWriter, req *http.Requ
 
 func (h *DBHandler) scheduleShowHandler(rw http.ResponseWriter, req *http.Request) {
 	id := getId(req)
+
 	schedule := Schedule{}
+
 	h.db.First(&schedule, id)
+
 	h.r.JSON(rw, http.StatusOK, &schedule)
 }
 
 func (h *DBHandler) scheduleCreateHandler(rw http.ResponseWriter, req *http.Request) {
-	h.schedulesEdit(rw, req, 0)
+	decoder := json.NewDecoder(req.Body)
+
+	createSchedule := ScheduleRequest{}
+
+	err := decoder.Decode(&createSchedule)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
+	schedule := Schedule{}
+
+	schedule.Name = createSchedule.Name
+	schedule.Mon = createSchedule.Mon
+	schedule.Tue = createSchedule.Tue
+	schedule.Wed = createSchedule.Wed
+	schedule.Thu = createSchedule.Thu
+	schedule.Fri = createSchedule.Fri
+	schedule.Sat = createSchedule.Sat
+	schedule.Sun = createSchedule.Sun
+	schedule.StartTime = createSchedule.StartTime
+	schedule.EndTime = createSchedule.EndTime
+
+	_, err = govalidator.ValidateStruct(&schedule)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
+	h.db.Save(&schedule)
+
+	h.r.JSON(rw, http.StatusOK, &schedule)
 }
 
 func (h *DBHandler) scheduleUpdateHandler(rw http.ResponseWriter, req *http.Request) {
 	id := getId(req)
-	h.schedulesEdit(rw, req, id)
+
+	decoder := json.NewDecoder(req.Body)
+
+	updateSchedule := ScheduleRequest{}
+
+	err := decoder.Decode(&updateSchedule)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
+	schedule := Schedule{}
+
+	h.db.First(&schedule, id)
+
+	schedule.Name = updateSchedule.Name
+	schedule.Mon = updateSchedule.Mon
+	schedule.Tue = updateSchedule.Tue
+	schedule.Wed = updateSchedule.Wed
+	schedule.Thu = updateSchedule.Thu
+	schedule.Fri = updateSchedule.Fri
+	schedule.Sat = updateSchedule.Sat
+	schedule.Sun = updateSchedule.Sun
+	schedule.StartTime = updateSchedule.StartTime
+	schedule.EndTime = updateSchedule.EndTime
+
+	_, err = govalidator.ValidateStruct(&schedule)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
+	h.db.Save(&schedule)
+
+	h.r.JSON(rw, http.StatusOK, &schedule)
 }
 
 func (h *DBHandler) scheduleDeleteHandler(rw http.ResponseWriter, req *http.Request) {
 	id := getId(req)
+
 	schedule := Schedule{}
+
 	h.db.Delete(&schedule, id)
-	h.r.JSON(rw, http.StatusOK, &schedule)
-}
 
-func (h *DBHandler) schedulesEdit(rw http.ResponseWriter, req *http.Request, id int64) {
-	scheduleForm := ScheduleForm{}
-
-	if err := binding.Bind(req, &scheduleForm); err.Handle(rw) {
-		return
-	}
-
-	fmt.Println("%v+", scheduleForm)
-
-	schedule := Schedule{
-		ID:        id,
-		Name:      scheduleForm.Name,
-		Mon:       scheduleForm.Mon,
-		Tue:       scheduleForm.Tue,
-		Wed:       scheduleForm.Wed,
-		Thu:       scheduleForm.Thu,
-		Fri:       scheduleForm.Fri,
-		Sat:       scheduleForm.Sat,
-		Sun:       scheduleForm.Sun,
-		StartTime: scheduleForm.StartTime,
-		EndTime:   scheduleForm.EndTime,
-	}
-
-	h.db.Save(&schedule)
 	h.r.JSON(rw, http.StatusOK, &schedule)
 }

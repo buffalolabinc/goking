@@ -2,34 +2,20 @@ package main
 
 import (
 	_ "fmt"
-	"github.com/mholt/binding"
 	"net/http"
 	"time"
+	"database/sql"
 )
 
 type Log struct {
-	ID        int64     `json:"Id"`
-	Code      string    `json:"Code"`
-	ValidPin  bool      `json:"ValidPin"`
-	CreatedAt time.Time `json:"CreatedAt"`
-}
-
-type LogForm struct {
-	Code     string
-	ValidPin bool
-}
-
-func (lf *LogForm) FieldMap() binding.FieldMap {
-	return binding.FieldMap{
-		&lf.Code: binding.Field{
-			Form:     "code",
-			Required: true,
-		},
-		&lf.Code: binding.Field{
-			Form:     "validpin",
-			Required: true,
-		},
-	}
+	ID int64 `json:"id"`
+	Code string `json:"code"`
+	Card Card	`json:"card"`
+	CardID sql.NullInt64 `json:"-"`
+	Schedule Schedule `json:"schedule"`	
+	ScheduleID sql.NullInt64 `json:"-"`
+	ValidPin bool `json:"valid_pin"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (h *DBHandler) logsIndexHandler(rw http.ResponseWriter, req *http.Request) {
@@ -39,7 +25,7 @@ func (h *DBHandler) logsIndexHandler(rw http.ResponseWriter, req *http.Request) 
 
 	var logs []Log
 
-	h.db.Limit(perPage).Offset(offset).Find(&logs)
+	h.db.Order("created_at desc").Limit(perPage).Offset(offset).Preload("Card").Preload("Schedule").Find(&logs)
 
 	if logs == nil {
 		h.r.JSON(rw, http.StatusOK, make([]int64, 0))

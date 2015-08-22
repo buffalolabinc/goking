@@ -1,55 +1,41 @@
 package main
 
 import (
-	_ "fmt"
-	"github.com/mholt/binding"
 	"net/http"
 	"time"
+	"github.com/asaskevich/govalidator"
+	"encoding/json"
 )
 
+type CardIdentity struct {
+	ID	int64	`json:"id" valid:"required"`
+}
+
 type Card struct {
-	ID        int64      `json:"Id"`
-	Name      string     `json:"Name" valid:"alphanum,required"`
-	Code      string     `json:"Code" valid:"alphanum,required"`
-	Pin       string     `json:"Pin" valid:"numeric,required"`
-	IsActive  bool       `json:"IsActive" valid:"required"`
-	Schedules []Schedule `json:"Schedules" gorm:"many2many:card_schedule;"`
-	CreatedAt time.Time  `json:"CreatedAt"`
-	UpdatedAt time.Time  `json:"UpdatedAt"`
-	DeletedAt time.Time  `json:"DeletedAt"`
+	CardIdentity
+	Name      string     `json:"name" valid:"printableascii,required"`
+	Pin       string     `json:"-" valid:"numeric,required"`
+	IsActive  bool       `json:"is_active"`
+	Code      string     `json:"code" valid:"alphanum,required"`
+	Schedules []Schedule `json:"schedules" gorm:"many2many:card_schedule;"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt time.Time  `json:"deleted_at"`
 }
 
-type CardForm struct {
-	Name      string
-	Code      string
-	Pin       string
-	IsActive  bool
-	Schedules []Schedule
+type CreateCardRequest struct {
+	Name      string     `json:"name"`
+	Pin       string     `json:"pin"`
+	IsActive  bool       `json:"is_active"`
+	Code      string     `json:"code"`
+	Schedules []ScheduleIdentity `json:"schedules"`
 }
 
-func (cf *CardForm) FieldMap() binding.FieldMap {
-	return binding.FieldMap{
-		&cf.Name: binding.Field{
-			Form:     "name",
-			Required: true,
-		},
-		&cf.Code: binding.Field{
-			Form:     "code",
-			Required: true,
-		},
-		&cf.Pin: binding.Field{
-			Form:     "pin",
-			Required: true,
-		},
-		&cf.IsActive: binding.Field{
-			Form:     "is_active",
-			Required: true,
-		},
-		&cf.Schedules: binding.Field{
-			Form:     "schedules",
-			Required: true,
-		},
-	}
+type UpdateCardRequest struct {
+	Name      string     `json:"name"`
+	Pin       string     `json:"pin"`
+	IsActive  bool       `json:"is_active"`
+	Schedules []ScheduleIdentity `json:"schedules"`
 }
 
 func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request) {
@@ -80,54 +66,122 @@ func (h *DBHandler) cardsIndexHandler(rw http.ResponseWriter, req *http.Request)
 func (h *DBHandler) cardShowHandler(rw http.ResponseWriter, req *http.Request) {
 	id := getId(req)
 	card := Card{}
+
+	// Find the Card
 	h.db.First(&card, id)
+
+	// Hydrate our associations
+	h.db.Model(&card).Association("Schedules").Find(&card.Schedules)
+
 	h.r.JSON(rw, http.StatusOK, &card)
 }
 
 func (h *DBHandler) cardCreateHandler(rw http.ResponseWriter, req *http.Request) {
-	h.cardsEdit(rw, req, 0)
+	decoder := json.NewDecoder(req.Body)
+
+	createCard := CreateCardRequest{}
+
+	err := decoder.Decode(&createCard)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
+	var cardCount int
+
+	h.db.Model(Card{}).Where("code = ? AND is_active = ?", createCard.Code, true).Count(&cardCount)
+
+	if cardCount > 0 {
+		h.r.JSON(rw, http.StatusConflict, map[string]string{"error":"More than one active card with that code"})
+		return
+	}
+
+	card := Card{}
+
+	card.Name = createCard.Name
+	card.Code = createCard.Code
+	card.Pin = createCard.Pin
+	card.IsActive = createCard.IsActive
+
+	_, err = govalidator.ValidateStruct(&card)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
+	scheduleIds := []int64{}
+
+	for _, val := range createCard.Schedules {
+		scheduleIds = append(scheduleIds, val.ID)
+	}
+
+	schedules := []Schedule{}
+
+	h.db.Where("id in (?)", scheduleIds).Find(&schedules)
+
+	card.Schedules = schedules
+
+	h.db.Save(&card)
+	
+	h.r.JSON(rw, http.StatusOK, &card)
 }
 
 func (h *DBHandler) cardUpdateHandler(rw http.ResponseWriter, req *http.Request) {
+	decoder := json.NewDecoder(req.Body)
+
+	updateCard := UpdateCardRequest{}
+
+	err := decoder.Decode(&updateCard)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
 	id := getId(req)
-	h.cardsEdit(rw, req, id)
+	card := Card{}
+
+	h.db.First(&card, id)
+
+	card.Name = updateCard.Name
+	card.IsActive = updateCard.IsActive
+
+	if len(updateCard.Pin) > 0 {
+		card.Pin = updateCard.Pin
+	}
+
+	_, err = govalidator.ValidateStruct(&card)
+
+	if err != nil {
+		h.r.JSON(rw, http.StatusBadRequest, map[string]string{"error":err.Error()})
+		return
+	}
+
+	h.db.Save(&card)
+
+	scheduleIds := []int64{}
+
+	for _, val := range updateCard.Schedules {
+		scheduleIds = append(scheduleIds, val.ID)
+	}
+
+	schedules := []Schedule{}
+
+	h.db.Where("id in (?)", scheduleIds).Find(&schedules)
+
+	h.db.Model(&card).Association("Schedules").Replace(schedules)
+
+	h.r.JSON(rw, http.StatusOK, &card)
 }
 
 func (h *DBHandler) cardDeleteHandler(rw http.ResponseWriter, req *http.Request) {
 	id := getId(req)
+
 	card := Card{}
+
 	h.db.Delete(&card, id)
-	h.r.JSON(rw, http.StatusOK, &card)
-}
 
-func (h *DBHandler) cardsEdit(rw http.ResponseWriter, req *http.Request, id int64) {
-	cardForm := CardForm{}
-
-	if err := binding.Bind(req, &cardForm); err.Handle(rw) {
-		return
-	}
-
-	// lookup the schedule to see if we have it
-	// then populate it form our data to avoid an update
-	scheduleIds := cardForm.Schedules
-
-	hydratedSchedules := make([]Schedule, len(scheduleIds))
-	for _, val := range scheduleIds {
-		schedule := Schedule{}
-		h.db.First(&schedule, val.ID)
-
-		hydratedSchedules = append(hydratedSchedules, schedule)
-	}
-
-	card := Card{
-		ID:        id,
-		Name:      cardForm.Name,
-		Code:      cardForm.Code,
-		Pin:       cardForm.Pin,
-		IsActive:  cardForm.IsActive,
-		Schedules: hydratedSchedules,
-	}
-
-	h.db.Save(&card)
 	h.r.JSON(rw, http.StatusOK, &card)
 }
