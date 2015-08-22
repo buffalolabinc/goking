@@ -8,7 +8,7 @@
  * Controller of the redqueenUiApp
  */
 angular.module('redqueenUiApp')
-  .controller('LogsCtrl', [ '$scope', 'Log', function ($scope, LogResource) {
+  .controller('LogsCtrl', [ '$scope', '$location', 'Log', function ($scope, $location, LogResource) {
     $scope.activeMenu = 'logs';
 
     $scope.perPage = 30;
@@ -24,6 +24,10 @@ angular.module('redqueenUiApp')
 
     $scope.queryLogs = function(page) { 
         update();
+    };
+
+    $scope.createCard = function(card) {
+    	$location.path('/rfidcards/new/' + card);
     };
 
     update();

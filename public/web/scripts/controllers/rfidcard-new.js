@@ -18,7 +18,7 @@ angular.module('redqueenUiApp')
     }
 
     ScheduleResource.all().then(function(data) {
-      $scope.schedules = data;
+      $scope.schedules = data.items;
     });
 
     $scope.submit = function() {

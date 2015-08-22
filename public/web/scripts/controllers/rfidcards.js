@@ -17,11 +17,11 @@ angular.module('redqueenUiApp')
     $scope.totalItems = 0;
 
     ScheduleResource.all().then(function(data){ 
-        $scope.has_schedules = (data.length > 0);
+        $scope.has_schedules = (data.total_items > 0);
     });
 
     $scope.edit = function RfidCardsCtrlEdit(rfidCard) {
-      $location.path('/rfidcards/' + rfidCard.Id + '/edit');
+      $location.path('/rfidcards/' + rfidCard.id + '/edit');
     };
 
     var update = function() {

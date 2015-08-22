@@ -32,16 +32,17 @@
     </tbody>
     <tbody ng-show="logs.length > 0">
         <tr ng-repeat="log in logs">
-            <td>{{ log.Id }}</td>
-            <td>{{ log.CreatedAt | date:'short'}}</td>
-            <td></td>
-            <td>{{ log.Code }}</td>
+            <td>{{ log.id }}</td>
+            <td>{{ log.created_at | date:'short'}}</td>
+            <td>{{ log.card.name }} <small class="muted" ng-show="{{ log.schedule.id }}">({{ log.schedule.name }})</small></td>
+            <td>{{ log.code }}</td>
             <td>
-                <span class="label label-success" ng-show="log.ValidPin">Yes</span>
-                <span class="label label-danger" ng-hide="log.ValidPin">No</span>
+                <span class="label label-success" ng-show="log.valid_pin">Yes</span>
+                <span class="label label-danger" ng-hide="log.valid_pin">No</span>
             </td>
             <td>
                 <div class="btn-group">
+          		<button class="btn btn-primary" ng-click="createCard(log.code)" ng-show="!log.card.id"><i class="glyphicon glyphicon-plus"></i> Add</button>
                 </div>
             </td>
         </tr>

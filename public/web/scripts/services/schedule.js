@@ -12,8 +12,8 @@ angular.module('redqueenUiApp')
 
     function Schedule(data) {
       angular.extend(this, data);
-      this.$isNew = (typeof(this.Id) === 'undefined' || !this.Id);
 
+      this.$isNew = (typeof(this.id) === 'undefined' || !this.id);
     }
 
     Schedule.all = function ScheduleResourceAll(page, per_page) {
@@ -42,11 +42,8 @@ angular.module('redqueenUiApp')
       $http.get('/api/schedules/' + id).then(function(data) {
         var schedule = new Schedule(data.data);
 
-        var sTime = moment(schedule.StartTime);
-        var eTime = moment(schedule.EndTime);
-
-        schedule.StartTime = sTime.format('HH:mm:ss');
-        schedule.EndTime = eTime.format('HH:mm:ss');
+	schedule.start_time = moment(schedule.start_time).toDate();
+	schedule.end_time = moment(schedule.end_time).toDate();
 
         deferred.resolve(schedule);
       }, function() {
@@ -62,31 +59,24 @@ angular.module('redqueenUiApp')
       var url = null;
       var method = null;
 
-      var fixTime = function(time) {
-        var t = time.length < 8 ? time + ':00' : time;
-
-        // make up some date because we dont care anyway
-        return moment('2015-05-12 '+t).toISOString();
-      };
-
       var data = {
-        Name: self.Name,
-        Mon: self.Mon === true,
-        Tue: self.Tue === true,
-        Wed: self.Wed === true,
-        Thu: self.Thu === true,
-        Fri: self.Fri === true,
-        Sat: self.Sat === true,
-        Sun: self.Sun === true,
-        StartTime: fixTime(self.StartTime),
-        EndTime: fixTime(self.EndTime)
+        name: self.name,
+        mon: self.mon === true,
+        tue: self.tue === true,
+        wed: self.wed === true,
+        thu: self.thu === true,
+        fri: self.fri === true,
+        sat: self.sat === true,
+        sun: self.sun === true,
+        start_time: self.start_time,
+        end_time: self.end_time
       };
 
       if (self.$isNew) {
         url = '/api/schedules';
         method = 'POST';
       } else {
-        url = '/api/schedules/' + self.Id;
+        url = '/api/schedules/' + self.id;
         method = 'PUT';
       }
 

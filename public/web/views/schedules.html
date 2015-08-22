@@ -40,38 +40,38 @@
     <td colspan="4">No schedules added.</td>
   </tr>
   <tr ng-repeat="schedule in schedules">
-    <td>{{ schedule.Id }}</td>
-    <td>{{ schedule.Name }}</td>
+    <td>{{ schedule.id }}</td>
+    <td>{{ schedule.name }}</td>
     <td>
-      <span class="label label-success" ng-show="schedule.Mon">Yes</span>
-      <span class="label label-danger" ng-hide="schedule.Mon">No</span>
+      <span class="label label-success" ng-show="schedule.mon">Yes</span>
+      <span class="label label-danger" ng-hide="schedule.mon">No</span>
     </td>
     <td>
-      <span class="label label-success" ng-show="schedule.Tue">Yes</span>
-      <span class="label label-danger" ng-hide="schedule.Tue">No</span>
+      <span class="label label-success" ng-show="schedule.tue">Yes</span>
+      <span class="label label-danger" ng-hide="schedule.tue">No</span>
     </td>
     <td>
-      <span class="label label-success" ng-show="schedule.Wed">Yes</span>
-      <span class="label label-danger" ng-hide="schedule.Wed">No</span>
+      <span class="label label-success" ng-show="schedule.wed">Yes</span>
+      <span class="label label-danger" ng-hide="schedule.wed">No</span>
     </td>
     <td>
-      <span class="label label-success" ng-show="schedule.Thu">Yes</span>
-      <span class="label label-danger" ng-hide="schedule.Thu">No</span>
+      <span class="label label-success" ng-show="schedule.thu">Yes</span>
+      <span class="label label-danger" ng-hide="schedule.thu">No</span>
     </td>
     <td>
-      <span class="label label-success" ng-show="schedule.Fri">Yes</span>
-      <span class="label label-danger" ng-hide="schedule.Fri">No</span>
+      <span class="label label-success" ng-show="schedule.fri">Yes</span>
+      <span class="label label-danger" ng-hide="schedule.fri">No</span>
     </td>
     <td>
-      <span class="label label-success" ng-show="schedule.Sat">Yes</span>
-      <span class="label label-danger" ng-hide="schedule.Sat">No</span>
+      <span class="label label-success" ng-show="schedule.sat">Yes</span>
+      <span class="label label-danger" ng-hide="schedule.sat">No</span>
     </td>
     <td>
-      <span class="label label-success" ng-show="schedule.Sun">Yes</span>
-      <span class="label label-danger" ng-hide="schedule.Sun">No</span>
+      <span class="label label-success" ng-show="schedule.sun">Yes</span>
+      <span class="label label-danger" ng-hide="schedule.sun">No</span>
     </td>
-    <td>{{ schedule.StartTime | date: 'HH:mm:ss Z'}}</td>
-    <td>{{ schedule.EndTime | date: 'HH:mm:ss Z'}}</td>
+    <td>{{ schedule.start_time | date: 'hh:mm:ss a' }}</td>
+    <td>{{ schedule.end_time | date: 'hh:mm:ss a' }}</td>
     <td>
       <div class="btn-group">
         <a class="btn btn-default" ng-click="edit(schedule)">Edit</a>

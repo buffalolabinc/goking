@@ -37,11 +37,11 @@
     <td colspan="4">No RFID Cards added.</td>
   </tr>
   <tr ng-repeat="rfidCard in rfidCards">
-    <td>{{ rfidCard.Name }}</td>
-    <td>{{ rfidCard.Code }}</td>
+    <td>{{ rfidCard.name }}</td>
+    <td>{{ rfidCard.code }}</td>
     <td>
-      <span class="label label-success" ng-show="rfidCard.IsActive">Yes</span>
-      <span class="label label-danger" ng-hide="rfidCard.IsActive">No</span>
+      <span class="label label-success" ng-show="rfidCard.is_active">Yes</span>
+      <span class="label label-danger" ng-hide="rfidCard.is_active">No</span>
     </td>
     <td>
       <div class="btn-group">

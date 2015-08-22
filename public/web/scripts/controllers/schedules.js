@@ -17,7 +17,7 @@ angular.module('redqueenUiApp')
     $scope.totalItems = 0;
 
     $scope.edit = function SchedulesCtrlEdit(rfidCard) {
-      $location.path('/schedules/' + rfidCard.Id + '/edit');
+      $location.path('/schedules/' + rfidCard.id + '/edit');
     };
 
     var update = function() { 

@@ -20,6 +20,10 @@ angular
   ])
   .config(function ($routeProvider) {
     $routeProvider
+      .when('/rfidcards/new/:code', {
+        templateUrl: 'views/rfidcards/form.html',
+        controller: 'RfidCardNewCtrl'
+      })
       .when('/rfidcards/new', {
         templateUrl: 'views/rfidcards/form.html',
         controller: 'RfidCardNewCtrl'
