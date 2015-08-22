@@ -5,3 +5,4 @@ public/node_modules
 public/web/*
 public/.sass-cache
 public/.tmp
+goqueen_conf.json

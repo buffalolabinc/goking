@@ -1,0 +1,19 @@
+{
+    "asset_path" : "",
+    "db_name": "go_live.sqlite",
+    "db_config": [
+        "foreign_keys=ON"
+    ],
+    "port": "8080",
+    "debug": true,
+    "truncate": false,
+    "authentication": {
+    	"username": "",
+	"password": ""
+    },
+    "serial": {
+        "enabled": false,
+        "device_path": "/dev/ttyS0",
+	"baud_rate": 9600
+    }
+}
