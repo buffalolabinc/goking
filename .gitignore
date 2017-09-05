@@ -1,8 +1,4 @@
 *.swp
 *.swo
-public/bower_components
-public/node_modules
-public/web/*
-public/.sass-cache
-public/.tmp
 goqueen_conf.json
+goking

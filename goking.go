@@ -7,12 +7,10 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+  _ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/tarm/serial"
-	"github.com/nabeken/negroni-auth"
-	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/thoas/stats"
 	"github.com/unrolled/render"
-	"net/http"
 	"os"
 	"strings"
 	"log"
@@ -50,8 +48,8 @@ func main() {
 	}
 
 	// setup db
-	fmt.Println("%v+", config.DbConfig)
-	db, err := gorm.Open("sqlite3", "./"+config.DbName+"?"+strings.Join(config.DbConfig, "?"))
+	fmt.Println("Connecting with %s and DSN %s", config.DbDriver, config.DbDsn)
+  db, err := gorm.Open(config.DbDriver, config.DbDsn)
 	checkErr(err)
 
 	db.LogMode(config.Debug)
@@ -76,7 +74,7 @@ func main() {
 	if config.Serial.Enabled {
 		fmt.Println("Starting Serial goroutine")
 
-		go func(db gorm.DB) {
+		go func(db *gorm.DB) {
 			c := &serial.Config{Name: config.Serial.DevicePath, Baud: config.Serial.BaudRate, ReadTimeout: time.Second * 5}
 
 			s, err := serial.OpenPort(c)
@@ -144,7 +142,7 @@ func main() {
 							fmt.Println("Failed to send response over Serial ", err)
 							continue SerialLoop
 						}
-						
+
 						err = binary.Write(writer, binary.BigEndian, uint32(5))
 
 						if err != nil {
@@ -168,10 +166,10 @@ func main() {
 
 }
 
-func configureHttpAndListen(config *AppConfig, db gorm.DB) {
+func configureHttpAndListen(config *AppConfig, db *gorm.DB) {
 	// register routes
 	r := render.New(render.Options{})
-	h := DBHandler{db: &db, r: r}
+	h := DBHandler{db: db, r: r}
 
 	router := mux.NewRouter()
 
@@ -191,10 +189,8 @@ func configureHttpAndListen(config *AppConfig, db gorm.DB) {
 
 	n := negroni.New(
 		negroni.NewRecovery(),
-		negroni.NewStatic(http.Dir(config.AssetPath)),
 	)
 
-	n.Use(auth.Basic(config.Authentication.Username, config.Authentication.Password))
 	n.UseHandler(router)
 	n.Run(":" + config.Port)
 }

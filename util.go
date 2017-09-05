@@ -1,30 +1,25 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/acmacalister/skittles"
 	"github.com/asaskevich/govalidator"
 	"github.com/gorilla/mux"
+  "net/http"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 )
 
 type AppConfig struct {
-	AssetPath string   `json:"asset_path" valid:"required"`
-	DbName    string   `json:"db_name" valid:"required"`
+	DbDriver  string   `json:"db_driver" valid:"required"`
+  DbDsn     string   `json:"db_dsn" valid:"required"`
 	Debug     bool     `json:"debug" valid:"required"`
-	DbConfig  []string `json:"db_config" valid:"required"`
 	Port      string   `json:"port" valid:"required,numeric"`
 	Truncate  bool     `json:"truncate"`
-	Authentication struct {
-	    Username string `json:"username"`
-	    Password string `json:"password"`
-	} `json:"authentication"`
+
 	Serial    struct {
 	    Enabled bool `json:"enabled"`
 	    DevicePath string `json:"device_path" valid:"required"`
@@ -53,17 +48,6 @@ func loadConfig(path string, config *AppConfig) {
 	_, validErr := govalidator.ValidateStruct(*config)
 	checkErr(validErr)
 
-}
-
-func getAssetPath(config *AppConfig, path string) string {
-
-	var buffer bytes.Buffer
-
-	buffer.WriteString(config.AssetPath)
-	buffer.WriteString("/")
-	buffer.WriteString(path)
-
-	return buffer.String()
 }
 
 func checkErr(e error) bool {
